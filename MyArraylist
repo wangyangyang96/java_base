@@ -1,0 +1,45 @@
+class MyArrayList<E>{
+    private Object[] data;
+    private int size;
+
+    public int getSize() {
+        return size;
+    }
+
+    private final static int DEFLUT_CAP=10;
+    public MyArrayList() {
+        data=new Object[DEFLUT_CAP];
+    }
+
+    public MyArrayList(int cap) {
+        data=new Object[cap];
+    }
+    public boolean add(E e){
+        int len=data.length;
+				//need more space
+				//basically just create a new array with size of 1.5 old data size
+				//copy all the original elements from the original
+				//and make the pointer point to the new array
+        if(size==data.length){
+            Object[] newdata=new Object[size+size>>1];
+            System.arraycopy(data,0,newdata,0,data.length);
+            data=newdata;
+        }
+        data[size++]=e;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb=new StringBuilder();
+        sb.append("[");
+        int i=0;
+        while(i<size){
+            sb.append(data[i].toString()+",");
+            i++;
+        }
+        sb.setCharAt(sb.length()-1,']');
+        return sb.toString();
+    }
+
+}
