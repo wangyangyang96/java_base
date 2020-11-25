@@ -28,6 +28,11 @@ class MyArrayList<E>{
         data[size++]=e;
         return true;
     }
+    public boolean remove(int index){
+        System.arraycopy(data,index+1,data,index,data.length-index-1);
+        data[--size]=null;
+        return true;
+    }
 
     @Override
     public String toString() {
