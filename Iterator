@@ -1,0 +1,39 @@
+public void test1(){
+
+        List<Integer> list=new ArrayList<>();
+        list.add(6);
+        list.add(7);
+        list.add(8);
+        //1.List的遍历方式
+        for(Iterator<Integer> iter=list.iterator();iter.hasNext();){
+            Integer temp=iter.next();
+            System.out.println(temp);
+        }
+        Set<Integer> st=new HashSet<>();
+        st.add(0);
+        st.add(1);
+        st.add(2);
+        //2.Set的遍历方式
+        for(Iterator<Integer> iter=st.iterator();iter.hasNext();){
+            Integer temp=iter.next();
+            System.out.println(temp);
+        }
+        Map<Integer,String> mp=new HashMap<>();
+        mp.put(1,"1");
+        mp.put(2,"2");
+        mp.put(3,"3");
+        //3.Map的遍历方式
+        //(1)
+        Set<Map.Entry<Integer,String>> ss1=mp.entrySet();
+        for(Iterator<Map.Entry<Integer,String>> iter=ss1.iterator();iter.hasNext();){
+            Map.Entry<Integer,String> temp=iter.next();
+            System.out.println("key=>"+temp.getKey()+" "+"val=>"+temp.getValue());
+        }
+        //(2)
+        Set<Integer> k=mp.keySet();
+        for(Iterator<Integer> iter=k.iterator();iter.hasNext();){
+            Integer key=iter.next();
+            System.out.println("key=>"+key+" "+"value"+mp.get(key));
+        }
+
+    }
