@@ -1,0 +1,20 @@
+class Student implements Serializable{
+    private static final long serialVersionUID = 42L;
+    transient int  age;
+    String name;
+    public Student() {
+    }
+
+    public Student(int age, String name)  {
+        this.age = age;
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return "Student{" +
+                "age=" + age +
+                ", name='" + name + '\'' +
+                '}';
+    }
+}
