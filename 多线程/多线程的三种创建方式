@@ -134,7 +134,6 @@ class WebDownloader{
 //          //启动
 //          t.start();
 //          注：Thread类也实现了runnable接口
-
 class MyThread3 implements Runnable{
     //run方法线程
     @Override
