@@ -1,0 +1,57 @@
+/*
+    静态代理模式总结：
+        真实对象和代理对象都要实现同一个接口
+        代理对象要代理真实角色
+        PROS:
+            代理可以做真实对象所不能做的事情
+            真实对象只做自己的事情
+ */
+class StacticProxy{
+    public static void main(String[] args) {
+//        People consumer = new People("John","Jules");
+//        consumer.MakeAPromise();
+        WeddingCompany wc=new WeddingCompany(new People("John","Jules"));
+        wc.MakeAPromise();
+    }
+}
+interface Marry{
+    void MakeAPromise();
+}
+//真实角色
+class People implements Marry{
+    String name1,name2;
+
+    public People(String n1,String n2) {
+        this.name1 = n1;
+        this.name2 = n2;
+    }
+
+    @Override
+    public void MakeAPromise() {
+        System.out.println(name1+" brings "+name2+"! congrats!");
+    }
+}
+//代理角色
+class WeddingCompany implements Marry{
+    //真实目标角色
+    private  Marry target;
+
+    public WeddingCompany(Marry target) {
+        this.target = target;
+    }
+
+    @Override
+    public void MakeAPromise() {
+        before();
+        this.target.MakeAPromise();//真实对象
+        after();
+    }
+
+    private void after() {
+        System.out.println("clean the tables");
+    }
+
+    private void before() {
+        System.out.println("decorated the mansion");
+    }
+}
