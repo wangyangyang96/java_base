@@ -1,0 +1,350 @@
+/*
+主线程使用run()和start()调用方式的差异
+
+一个是普通方法调用，一个是多线程
+
+![image](C:\Users\yangyangwang\AppData\Roaming\Typora\typora-user-images\image-20201129092738794.png)
+
+1>程序是指令和数据的集合，本身没有任何动态运行的概念，只是一个静态的；
+
+2>进程是执行程序的一次执行过程，一个动态的概念，是资源分配的单位
+
+3>在一个进程中可以分配多个线程，一个进程中至少有一个线程(main、GC)，线程是CPU调度和执行的单位，是独立的执行路径
+
+注：1>很都多线程是模拟概念，真正的多线程是有多个CPU，即多核，如果是模拟出来的多线程，在一个CPU的情况下，在同一个时间点，CPU只能下执行一个代码，因为切换的很快，所以有同时执行的错觉
+
+2>在一个进程中若开辟多个线程，线程的运行由调度器安排调度，调度器是与操作系统紧密相关，先后顺序不可干预
+
+3>对同一份资源操作时，会存在资源抢夺问题，需要加入并发控制
+
+4>线程会带来格外开销，cpu调度时间、并发控制开销
+
+5>每个线程在工作内内存交互，内存控制不当会造成数据不一致
+
+
+
+
+ */
+import org.apache.commons.io.FileUtils;
+
+import javax.sound.midi.Soundbank;
+import java.io.*;
+import java.net.URL;
+import java.util.concurrent.*;
+
+//  一：创建线程的方法
+//      1.继承Thread类：一个是将一个类声明为一个Thread的子类。 这个子类应该重写run类的方法Thread 。 然后可以分配并启动子类的实例
+//          使当前类继承线程
+//          StartThread extends Thread;
+//          创建线程对象
+//          StartThread st=new  StartThread();
+//          启动线程
+//          st.start();
+class MyThread0 extends Thread{
+    //run方法重写线程
+    @Override
+    public void run() {
+        for (int i = 0; i < 20; i++) {
+            System.out.println("hello"+i);
+        }
+
+    }
+
+    public static void main(String[] args) {
+        //main方法开始线程
+        //创建一个线程对象
+        MyThread0 mt=new MyThread0();
+        //调用start()方法开启线程
+        mt.start();
+        //*线程不一定立即执行，CPU安排调度
+        //在此处调用run方法，则会单线程先执行run，
+        //失去多线程并行交替执行的特性
+        for (int i = 0; i < 1000; i++) {
+            System.out.println("help"+i);
+        }
+    }
+}
+
+//      //练习Thread，实现多线程同步下载图片
+class MyThread1 extends Thread{
+    /*
+    下载jar包，增加至lib目录，add as library
+ */
+    private String url;
+    private String name;
+
+    public MyThread1(String url, String name1) {
+        this.url = url;
+        this.name = name1;
+    }
+    public void downloader(String url,String name){
+        try {
+            FileUtils.copyURLToFile(new URL(url),new File(name));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    //下载图片线程执行体
+    @Override
+    public void run() {
+        //1
+        WebDownloader webDownloader=new WebDownloader();
+        webDownloader.downloader(url,name);
+        //2
+//        downloader(url,name);
+        System.out.println("you have finished a download "+name);
+    }
+
+    public static void main(String[] args) {
+        MyThread1 mt1=new MyThread1("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=" +
+                "1606630419598&di=2f27a156ad7734a2164069ceac5c6d5e&imgtype=0&src=http%3A%2F%2Fc-ssl.du" +
+                "itang.com%2Fuploads%2Fitem%2F201809%2F05%2F20180905082547_ltwxq.thumb.400_0.jpeg","crycatbabe1.jpeg");
+        MyThread1 mt2=new MyThread1("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10" +
+                "000&sec=1606630789214&di=24d8a534060f70c3e" +
+                "270091bca24d7cd&imgtype=0&src=http%3A%2F%2Fi0.hdslb.com%2Fbfs%2Farticle%2F3474f9e56" +
+                "2aa59b481c81e6a027532eea10acb69.jpg","crycatbabe2.jpg");
+        mt1.start();
+        mt2.start();
+
+
+
+    }
+
+
+
+}
+            //下载器
+class WebDownloader{
+    //下载方法
+        public void downloader(String url,String name){
+            try {
+                FileUtils.copyURLToFile(new URL(url),new File(name));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+}
+//      2实现runnable接口:类实现runnable接口，重写了run方法。 然后可以分配类的实例，在创建Thread时作为参数传递，并启动
+//          //创建Runnable接口的实现类对象
+//          StartThread implements Runnable;
+//          //创建实现类对象
+//          StartThread st=new StartThread();
+//          //创建代理类对象
+//          Thread t=new Thread(st);
+//          //启动
+//          t.start();
+//          注：Thread类也实现了runnable接口
+
+class MyThread3 implements Runnable{
+    //run方法线程
+    @Override
+    public void run() {
+        for (int i = 0; i < 20; i++) {
+            System.out.println("hello"+i);
+        }
+
+    }
+
+    public static void main(String[] args) {
+        MyThread3 mt3=new MyThread3();
+        //Thread构造方法中可以传入一个Runnable目标
+        Thread t=new Thread(mt3);
+        t.start();
+        for (int i = 0; i < 1000; i++) {
+            System.out.println("help"+i);
+        }
+    }
+}
+//      两种创建方式的比较
+//          继承Thread类：
+//              启动线程：子类对象.start()
+//              不建议使用：避免OOP的单继承局限性
+//          实现runnable接口：
+//              启动线程：传入目标对象+Thread对象.start()
+//              推荐使用：避免单继承局限性，方便同一个对象被多个线程同时使用
+//               注释： //一份资源
+//                        StartThread station=new StartThread();
+//                      //多个代理
+//                        new Thread(station).start();
+//                        new Thread(station).start();
+//                        new Thread(station).start();
+//      //练习：多线程同时操作同一个对象，购买火车票
+class TestThread implements Runnable{
+//    多个线程操作同一个资源，会产生资源争夺，存在多个人拿到一张票的问题
+    private int ticketNum=10;
+    @Override
+    public void run() {
+        while(true){
+            if(ticketNum<=0) break;
+            System.out.println(Thread.currentThread().getName()
+                    +"get the ticket "+ticketNum--);
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        TestThread tt=new TestThread();
+        new Thread(tt,"1").start();
+        new Thread(tt,"2").start();
+        new Thread(tt,"3").start();
+        new Thread(tt,"4").start();
+    }
+}
+//      //练习：龟兔赛跑
+//          //my version(总是会打印出来两个对象...)
+class Race implements Runnable{
+//    int dis=100;
+    String winner;
+    @Override
+    public void run() {
+        if(Thread.currentThread().getName()=="rabbit"){
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        for (int i = 100; i>=0;) {
+            //here is a problem,both sides are all taking away the distance and
+            // distance is no longer changes with compepitors
+            //i used while(dis>=0) as the condition
+            if(overGame(i)) break;
+            if ( Thread.currentThread().getName()== "rabbit") {
+                i -= 5;
+
+            } else if (Thread.currentThread().getName() == "turtle") {
+                    i -= 1;
+                }
+            System.out.println(Thread.currentThread().getName()+" got "+i+" left");
+        }
+    }
+    boolean overGame(int d){
+        if(winner!=null) return true;
+        if(d<=0){
+            winner=Thread.currentThread().getName();
+            System.out.println("winner goes to "+winner);
+            return true;
+        }
+        return false;
+    }
+    public static void main(String[] args) {
+        Race rc=new Race();
+        new Thread(rc,"turtle").start();
+        new Thread(rc,"rabbit").start();
+
+    }
+}
+class Race1 implements Runnable{
+    String winner;
+    @Override
+    public void run() {
+
+        for (int i = 0; i <= 100; i++) {
+            if(i>0&&i%10==0&&Thread.currentThread().getName().equals("rabbit")) {
+                try {
+                    Thread.sleep(2);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            boolean flag=gameOver(i);
+            if(flag){
+                break;
+            }
+            System.out.println(Thread.currentThread().getName()
+                    +" "+i+" miles amay");
+        }
+    }
+    public boolean gameOver(int step){
+        if(winner!=null){
+            return true;
+        }
+        if(step>=100){
+            winner=Thread.currentThread().getName();
+            System.out.println("winner goes to "+winner);
+            return true;
+        }
+        return false;
+    }
+
+    public static void main(String[] args) {
+        Race1 r1=new Race1();
+        new Thread(r1,"rabbit").start();
+        new Thread(r1,"turtle").start();
+    }
+}
+//      3.实现callable接口
+//          //实现Callable接口，需要返回值类型
+//          //重写call方法，需要抛出异常
+//          //创建目标对象target1、target2.....
+//          //创建执行服务：
+//          ExecutorService es=Executor.newFixedThreadPool(int nThreads)
+//          //提交执行
+//          Future<Boolean> result1=es.submit(target1);
+//          Future<Boolean> result2=es.submit(target2);....
+//          //获取结果
+//          boolean r1=result1.get();
+//          boolean r2=result2.get();
+//          //关闭服务
+//          es.shutdownNow();
+//    >>优点:
+//          1.可以定义返回值
+//          2.可以抛出异常
+//              //例子：下载网图
+class CallThread implements Callable<Boolean>{
+    private String url;
+    private String name;
+
+    public CallThread(String url, String name1) {
+        this.url = url;
+        this.name = name1;
+    }
+    public void downloader(String url,String name){
+        try {
+            FileUtils.copyURLToFile(new URL(url),new File(name));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    //下载图片线程执行体
+    @Override
+    public Boolean call() {
+        //1
+        WebDownloader webDownloader=new WebDownloader();
+        webDownloader.downloader(url,name);
+        //2
+//        downloader(url,name);
+        System.out.println("you have finished a download "+name);
+        return true;
+    }
+
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+        CallThread ct1=new CallThread("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=" +
+                "1606630419598&di=2f27a156ad7734a2164069ceac5c6d5e&imgtype=0&src=http%3A%2F%2Fc-ssl.du" +
+                "itang.com%2Fuploads%2Fitem%2F201809%2F05%2F20180905082547_ltwxq.thumb.400_0.jpeg","crycatbabe1.jpeg");
+        CallThread ct2=new CallThread("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10" +
+                "000&sec=1606630789214&di=24d8a534060f70c3e" +
+                "270091bca24d7cd&imgtype=0&src=http%3A%2F%2Fi0.hdslb.com%2Fbfs%2Farticle%2F3474f9e56" +
+                "2aa59b481c81e6a027532eea10acb69.jpg","crycatbabe2.jpg");
+        //创建执行服务
+        ExecutorService es= Executors.newFixedThreadPool(2);
+        //提交执行
+        Future<Boolean> res1=es.submit(ct1);
+        Future<Boolean> res2=es.submit(ct2);
+        //获取结果
+        boolean r1=res1.get();
+        boolean r2=res2.get();
+        //关闭服务
+        es.shutdownNow();
+
+
+
+    }
+
+
+
+}
