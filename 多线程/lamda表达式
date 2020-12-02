@@ -1,0 +1,154 @@
+import javax.xml.ws.WebEndpoint;
+
+/*
+    lamda表达式
+        函数式接口：任何接口只包含唯一一个抽象方法，那么就是一个函数式接口
+        public interface Runnable{
+            public abstract void run();
+        }
+        对于函数式接口可以通过lamda表达式来创建该接口
+
+
+
+ */
+// 一、推导lamda表达式
+class Test1{
+//    ③静态内部类
+    static class Like2 implements ILike{
+        @Override
+        public void lamda() {
+            System.out.println("i like lamda2");
+        }
+}
+    public static void main(String[] args) {
+        //用接口定义一个实现类
+        ILike like=new Like();
+        like.lamda();
+        like=new Like2();
+        like.lamda();
+//        ④局部内部类
+        class Like3 implements ILike{
+            @Override
+            public void lamda() {
+                System.out.println("i like lamda3");
+            }
+        }
+        like=new Like3();
+        like.lamda();
+//        ⑤匿名内部类,没有类的名称，必须借助接口或者父类
+        like=new ILike() {
+            @Override
+            public void lamda() {
+                System.out.println("i like lamda4");
+            }
+        };
+        like.lamda();
+//        ⑥用lamda简化
+        like=()->{
+            System.out.println("i like lamda5");
+        };
+
+    }
+}
+//       ①定义一个函数式接口
+interface ILike{
+    void lamda();
+}
+//       ②实现类
+class Like implements ILike{
+    @Override
+    public void lamda() {
+        System.out.println("i like lamda");
+    }
+}
+// 自定义实现一个带参数
+
+
+
+
+class demo{
+//    静态内部类
+static class Person2 implements Weed{
+    String name;
+
+    public Person2() {
+    }
+
+    public Person2(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public void doIt(String name) {
+        System.out.println("done it-2\t"+name);
+    }
+}
+
+//    通过接口实现类
+    public static void main(String[] args) {
+        Weed p=new Person1();
+        p.doIt("lee");
+        p=new Person2("dee");
+        p.doIt("dee");
+//        局部内部类
+        class Person3 implements Weed{
+            String name;
+
+            public Person3() {
+            }
+
+            public Person3(String name) {
+                this.name = name;
+            }
+
+            @Override
+            public void doIt(String name) {
+                System.out.println("done it-3\t"+name);
+            }
+        }
+        p=new Person3();
+        p.doIt("ree");
+//        匿名内部类
+        p=new Weed() {
+            @Override
+            public void doIt(String name) {
+                System.out.println("done it-4\t"+name);
+            }
+        };
+        p.doIt("rii");
+        p=(String name)->{
+            System.out.println("done it-5\t"+name);
+        };
+        p.doIt("pi");
+        //简化1.参数类型
+        p=(name)->{ System.out.println("done it-6\t"+name);};
+        p.doIt("tie");
+        //简化2.简化花括号
+        p=name -> System.out.println("done it-7\t"+name);
+            //lamda表达式只能有一行代码
+            //前提式式函数式接口
+            //可以去掉参数类型，但行动要统一
+        p.doIt("oii");
+    }
+
+}
+//11.接口
+interface Weed{
+    void doIt(String name);
+}
+//22.实现类
+class Person1 implements Weed{
+    public Person1() {
+    }
+
+    String name;
+
+    public Person1(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public void doIt(String name) {
+        System.out.println("done it-1\t"+name);
+    }
+}
