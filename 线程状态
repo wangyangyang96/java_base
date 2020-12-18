@@ -1,0 +1,48 @@
+import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
+
+/*
+public static enum Thread.State
+extends Enum<Thread.State>线程状态。 线程可以处于以下状态之一(枚举类型)：
+NEW
+    尚未启动的线程处于此状态。
+RUNNABLE
+    在Java虚拟机中执行的线程处于此状态。
+BLOCKED
+    被阻塞等待监视器锁定的线程处于此状态。
+WAITING
+    正在等待另一个线程执行特定动作的线程处于此状态。
+TIMED_WAITING
+    正在等待另一个线程执行动作达到指定等待时间的线程处于此状态。
+TERMINATED
+    已退出的线程处于此状态。
+
+ */
+//监测线程状态
+class Test{
+    public static void main(String[] args) throws InterruptedException {
+        Thread thread = new Thread(()->{
+            for (int i = 0; i < 5; i++) {
+                try {
+                    Thread.sleep(1000);
+                    System.out.println(i);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            System.out.println("///////");
+        });
+        //观察状态
+        Thread.State state = thread.getState();//alt+enter
+        System.out.println(state);//NEW
+        //观察启动后
+        thread.start();
+        System.out.println(thread.getState());//RUNNABLE
+
+        while(state!=Thread.State.TERMINATED){
+            Thread.sleep(100);
+            state=thread.getState();
+            System.out.println(state);
+        }
+
+    }
+}
