@@ -1,0 +1,78 @@
+/*
+    线程优先级：
+        Java提供一个线程调度器来监控程序中启动后进入就绪状态的所有线程，
+        线程调度器按照优先级决定应该调度哪个线程来执行
+        最小为1，最大为10
+        可以使用以下方式获取或者改变优先级
+        getPriority(),setPriority(int xxx)
+        优先级低只意味着调度的概率低，并不一定会最后执行
+
+ */
+class testPrority {
+
+    public static void main(String[] args) {
+        //主线程优先级
+        System.out.println(Thread.currentThread().getName()+"-->"+Thread.currentThread().getPriority());
+        MyPriority myPriority = new MyPriority();
+
+        Thread t1 = new Thread(myPriority);
+        Thread t2 = new Thread(myPriority);
+        Thread t3 = new Thread(myPriority);
+
+        //先设置优先级再启动线程
+        t1.start();
+        t1.setDaemon(true);
+
+        t2.setPriority(2);
+        t2.start();
+
+        t3.setPriority(Thread.MAX_PRIORITY);
+        t3.start();
+    }
+
+}
+class MyPriority implements Runnable{
+
+    @Override
+    public void run() {
+        System.out.println(Thread.currentThread().getName()+"-->"+Thread.currentThread().getPriority());
+    }
+}
+/*
+    守护线程
+    线程分为用户线程和守护线程
+    虚拟机要保证用户线程执行完毕
+    虚拟机不用等待守护线程执行完毕
+ */
+class d{
+    public static void main(String[] args) {
+        Thread t1 = new Thread(new World());
+        t1.setDaemon(true);
+        t1.setPriority(10);
+        t1.start();
+
+        Thread t2=new Thread(new People());
+
+        t2.start();
+
+
+    }
+}
+class World implements Runnable{
+
+    @Override
+    public void run() {
+        while (true){
+            System.out.println("still running");
+        }
+    }
+}
+class People implements Runnable{
+    @Override
+    public void run() {
+        for (int i = 0; i < 100; i++) {
+            System.out.println("this is your "+i+"th year");
+        }
+        System.out.println("bye");
+    }
+}
