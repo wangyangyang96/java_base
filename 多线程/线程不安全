@@ -1,0 +1,126 @@
+package Demo1;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/*
+    并发：同一个对象被多个线程同时操作
+    线程同步：一种等待机制
+    队列和锁：统一进程的多个线程共享同一块存储空间，
+            为了保证数据在方法中被访问时的正确性，在访问时加入锁机制synchronized，
+            当一个线程获得对象的排它锁，独占资源，其他线程必须等待，使用后释放锁即可。
+            可能还会存在以下问题：
+                1.一个线程持有锁会导致其他所有需要此锁的线程挂起；
+                2.在多线程竞争下，加锁释放锁会导致较多的上下文切换和调度延时，会引起性能问题；
+                3.如果优先级高的线程等待一个优先级低的线程释放锁会导致资源倒置，引起性能问题
+
+ */
+//不安全的买票
+//线程不安全：有票额-1：
+class UnsafeBuying{
+    public static void main(String[] args) {
+        BuyTicket station=new BuyTicket();
+        new Thread(station,"lee").start();
+        new Thread(station,"dee").start();
+        new Thread(station,"ree").start();
+
+    }
+
+}
+class BuyTicket implements Runnable{
+    private int ticketNumber=10;
+    boolean flag=true;
+    @Override
+    public void run() {
+        //买票
+        while(flag){
+            try {
+                buy();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    private void buy() throws InterruptedException {
+        //判断是否有票
+        if(ticketNumber<=0){
+            flag=false;
+            return;
+
+        }
+        //模拟延时
+        Thread.sleep(100);
+
+        //买票票
+        System.out.println(Thread.currentThread().getName()+" get "+ticketNumber--);
+    }
+}
+//不安全的取钱
+//两个人去取钱
+class UnSafeBank{
+    public static void main(String[] args) {
+        Account account=new Account(100,"基金");
+        Drawing you=new Drawing(account,50,"you");
+        Drawing gf=new Drawing(account,100,"gf");
+
+        you.start();
+        gf.start();
+    }
+}
+//账户
+class Account{
+    int money;
+    String name;
+
+    public Account(int money, String name) {
+        this.money = money;
+        this.name = name;
+    }
+}
+//银行取款
+//为啥只继承Thread呢？不使用runnable？？（一份资源可以获得多个代理
+class Drawing extends Thread {
+    Account account;
+    int drawingMoney;
+    int currentMoney;
+
+    public Drawing(Account account, int drawingMoney,String name) {
+        super(name);
+        this.account = account;
+        this.drawingMoney = drawingMoney;
+    }
+
+    @Override
+    public void run() {
+        if(account.money-drawingMoney<0){
+            System.out.println(Thread.currentThread().getName()+" ran out of money");
+            return;
+        }
+        else{
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            account.money-=drawingMoney;
+            currentMoney+=drawingMoney;
+        }
+        System.out.println(account.name+"余额为"+account.money);
+        System.out.println(this.getName()+"持有"+currentMoney);
+    }
+}
+//线程不安全的集合
+class UnsafeList{
+    public static void main(String[] args) throws InterruptedException {
+        List<String> list=new ArrayList<>();
+        for (int i = 0; i < 10000; i++) {
+            new Thread(()->{
+                list.add(Thread.currentThread().getName());
+            }).start();
+            
+        }
+        Thread.sleep(3000);
+        System.out.println(list.size());
+        //9998:多个线程操作同一个位置时会产生覆盖
+    }
+}
