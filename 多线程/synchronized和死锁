@@ -1,0 +1,114 @@
+package Demo1;
+
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+/*
+同步方法：
+    1.private关键字只能被方法访问，类似的机制为synchronized，保证方法是同步的，
+      包括两种用法：synchronized方法和synchronized块
+    2.synchronized方法控制对对象的访问，每个对象对应一把锁，每个synchronized方法
+      一旦执行就独占该锁，直到方法返回才释放锁，后面被阻塞的线程才能获得这个锁，继续执行
+      缺陷：锁如果对于只读模式的话就会浪费资源，需要修改才会用到同步功能
+    synchronized块:
+    synchronized(Object){}
+        obj称为同步监视器
+            obj可以是任何对象，推荐使用共享资源作为同步监视器。
+            同步方法中无需指定同步监视器，因为同步方法的同步监视器就是this对象本身，或者是class
+        同步监视器的执行过程：
+            第一个线程访问，锁定同步监视器，执行其中代码
+            第二个线程访问，发现同步监视器被锁定，无法访问
+            第一个线程执行完毕，解锁同步监视器
+            第二个线程访问，发现同步监视器没有锁，锁定并访问
+
+ */
+/*
+    JUC:安全类型的集合
+ */
+class TestJUC{
+    public static void main(String[] args) {
+        CopyOnWriteArrayList<String> list=new CopyOnWriteArrayList();
+        for (int i = 0; i < 10000; i++) {
+            new Thread(()->{
+                list.add(Thread.currentThread().getName());
+            }).start();
+        }
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println(list.size());
+    }
+}
+/*
+    死锁：多个线程互相占有对方需要的资源然后形成死锁
+    死锁产生的必要条件：
+    1.互斥：一个资源只能被一个线程占有
+    2.请求与保持：当一个线程请求别的资源遇到阻塞时，对已经有的资源不丢弃
+    3.不可剥夺：进程对于已获得的资源在未使用完之前不能强行剥夺
+    4.循环等待：若干个资源之间形成头尾相接的循环等待资源关系
+
+ */
+class DeadLock{
+    public static void main(String[] args) {
+        MakeUp girl1=new MakeUp(0,"cinderella");
+        MakeUp girl2=new MakeUp(1,"gigi");
+
+        girl1.start();
+        girl2.start();
+
+    }
+
+}
+class Lipstick{
+
+}
+class Mirror{
+
+}
+class MakeUp extends Thread{
+    //需要的资源只有一份，用static修饰
+    static Lipstick lipstick= new Lipstick();
+    static Mirror mirror= new Mirror();
+
+    int choice;//选择
+    String girlName;//使用化妆品的人
+
+    MakeUp(int choice,String girlName){
+        this.choice=choice;
+        this.girlName=girlName;
+    }
+
+
+    @Override
+    public void run() {
+        //化妆
+        try {
+            makeup();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+    //化妆，互相占有对方的资源，
+    private void makeup() throws InterruptedException {
+        if(choice==0){
+            synchronized (lipstick){
+                System.out.println(girlName+"获得口红的锁");
+                Thread.sleep(1000);
+
+            }synchronized (mirror){
+                System.out.println(girlName+"获得镜子的锁");
+            }
+        }else{
+            synchronized (mirror){
+                System.out.println(girlName+"获得镜子的锁");
+                Thread.sleep(2000);
+
+            }synchronized (lipstick){
+                System.out.println(girlName+"获得口红的锁");
+            }
+        }
+    }
+}
